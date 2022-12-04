@@ -124,7 +124,7 @@ class UnitedConsumers:
 
     async def fetch_data(self) -> dict:
         """Fetch all data from United Consumers."""
-        return self._get_price_data()
+        return await self._get_price_data()
 
 
 class UcError(Exception):
