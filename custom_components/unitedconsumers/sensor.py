@@ -12,7 +12,11 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CURRENCY_EURO
+from homeassistant.const import (
+    CURRENCY_EURO,
+    ENERGY_KILO_WATT_HOUR,
+    VOLUME_CUBIC_METERS,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -27,6 +31,9 @@ from .pyuc import UcAuthError, UcError, UnitedConsumers
 
 _LOGGER = logging.getLogger(__name__)
 
+PRICE_EUR_KWH = f"EUR/{ENERGY_KILO_WATT_HOUR}"
+PRICE_EUR_M3 = f"EUR/{VOLUME_CUBIC_METERS}"
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -40,15 +47,29 @@ async def async_setup_entry(
 
     add_entities(
         [
-            UcTarifSensor(coordinator, "Low Tarif", "low", config_entry.unique_id),
-            UcTarifSensor(coordinator, "High Tarif", "high", config_entry.unique_id),
             UcTarifSensor(
-                coordinator, "Return Low Tarif", "ret-low", config_entry.unique_id
+                coordinator, "Low Tarif", "low", PRICE_EUR_KWH, config_entry.unique_id
             ),
             UcTarifSensor(
-                coordinator, "Return High Tarif", "ret-high", config_entry.unique_id
+                coordinator, "High Tarif", "high", PRICE_EUR_KWH, config_entry.unique_id
             ),
-            UcTarifSensor(coordinator, "Gas Tarif", "gas", config_entry.unique_id),
+            UcTarifSensor(
+                coordinator,
+                "Return Low Tarif",
+                "ret-low",
+                PRICE_EUR_KWH,
+                config_entry.unique_id,
+            ),
+            UcTarifSensor(
+                coordinator,
+                "Return High Tarif",
+                "ret-high",
+                PRICE_EUR_KWH,
+                config_entry.unique_id,
+            ),
+            UcTarifSensor(
+                coordinator, "Gas Tarif", "gas", PRICE_EUR_M3, config_entry.unique_id
+            ),
         ]
     )
 
@@ -94,14 +115,14 @@ class UcCoordinator(DataUpdateCoordinator):
 class UcTarifSensor(CoordinatorEntity, SensorEntity):
     """Representation of a Sensor."""
 
-    _attr_native_unit_of_measurement = CURRENCY_EURO
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    def __init__(self, coordinator, name, idx, config_entry_unique_id):
+    def __init__(self, coordinator, name, idx, unit, config_entry_unique_id):
         """Pass coordinator to CoordinatorEntity."""
         super().__init__(coordinator)
         self._attr_name = f"United Consumers {name}"
+        self._attr_native_unit_of_measurement = unit
         self._attr_unique_id = f"{config_entry_unique_id}_{idx}"
         self.idx = idx
 
