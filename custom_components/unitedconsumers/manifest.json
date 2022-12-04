@@ -1,0 +1,13 @@
+{
+  "domain": "unitedconsumers",
+  "name": "United Consumers",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/unitedconsumers",
+  "requirements": ["beautifulsoup4==4.11.1"],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": ["@rklomp"],
+  "iot_class": "cloud_polling"
+}
